@@ -40,6 +40,6 @@
 
         
 
-        <PackageReference Include="Soenneker.Blob.Container" Version="2.1.294" />
+        <PackageReference Include="Soenneker.Blob.Container" Version="2.1.296" />
     </ItemGroup>
 </Project>
