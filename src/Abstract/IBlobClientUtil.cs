@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
@@ -14,6 +13,5 @@ public interface IBlobClientUtil
     /// Will create container if it doesn't exist (if we haven't accessed this container since app restart)
     /// NOTE: <paramref name="containerName"/> will be converted to lowercase. 
     /// </summary>
-    [Pure]
-    ValueTask<BlobClient> GetClient(string containerName, string relativeUrl, PublicAccessType publicAccessType = PublicAccessType.None);
+    ValueTask<BlobClient> Get(string containerName, string relativeUrl, PublicAccessType publicAccessType = PublicAccessType.None);
 }

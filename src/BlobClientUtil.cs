@@ -3,6 +3,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Soenneker.Blob.Client.Abstract;
 using Soenneker.Blob.Container.Abstract;
+using Soenneker.Extensions.ValueTask;
 
 namespace Soenneker.Blob.Client;
 
@@ -16,14 +17,12 @@ public class BlobClientUtil : IBlobClientUtil
         _blobContainerUtil = blobContainerUtil;
     }
 
-    public async ValueTask<BlobClient> GetClient(string containerName, string relativeUrl, PublicAccessType publicAccessType = PublicAccessType.None)
+    public async ValueTask<BlobClient> Get(string containerName, string relativeUrl, PublicAccessType publicAccessType = PublicAccessType.None)
     {
-        string containerLower = containerName.ToLowerInvariant();
-
-        BlobContainerClient containerClient = await _blobContainerUtil.GetClient(containerLower, publicAccessType);
+        BlobContainerClient containerClient = await _blobContainerUtil.Get(containerName, publicAccessType).NoSync();
 
         BlobClient client = containerClient.GetBlobClient(relativeUrl);
-
+        
         return client;
     }
 }
