@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Soenneker.Blob.Client.Abstract;
@@ -17,9 +18,9 @@ public class BlobClientUtil : IBlobClientUtil
         _blobContainerUtil = blobContainerUtil;
     }
 
-    public async ValueTask<BlobClient> Get(string containerName, string relativeUrl, PublicAccessType publicAccessType = PublicAccessType.None)
+    public async ValueTask<BlobClient> Get(string containerName, string relativeUrl, PublicAccessType publicAccessType = PublicAccessType.None, CancellationToken cancellationToken = default)
     {
-        BlobContainerClient containerClient = await _blobContainerUtil.Get(containerName, publicAccessType).NoSync();
+        BlobContainerClient containerClient = await _blobContainerUtil.Get(containerName, publicAccessType, cancellationToken).NoSync();
 
         BlobClient client = containerClient.GetBlobClient(relativeUrl);
         
