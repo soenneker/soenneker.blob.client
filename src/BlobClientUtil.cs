@@ -22,8 +22,6 @@ public class BlobClientUtil : IBlobClientUtil
     {
         BlobContainerClient containerClient = await _blobContainerUtil.Get(containerName, publicAccessType, cancellationToken).NoSync();
 
-        BlobClient client = containerClient.GetBlobClient(relativeUrl);
-        
-        return client;
+        return containerClient.GetBlobClient(relativeUrl);
     }
 }

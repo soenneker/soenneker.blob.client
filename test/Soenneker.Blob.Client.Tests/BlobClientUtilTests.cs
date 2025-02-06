@@ -1,9 +1,6 @@
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Soenneker.Blob.Client.Abstract;
 using Soenneker.Tests.FixturedUnit;
 using Xunit;
-
 
 namespace Soenneker.Blob.Client.Tests;
 
