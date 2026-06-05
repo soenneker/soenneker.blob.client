@@ -10,6 +10,11 @@ namespace Soenneker.Blob.Client.Registrars;
 /// </summary>
 public static class BlobClientUtilRegistrar
 {
+    /// <summary>
+    /// Adds blob client util as singleton.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The result of the operation.</returns>
     public static IServiceCollection AddBlobClientUtilAsSingleton(this IServiceCollection services)
     {
         services.AddBlobContainerUtilAsSingleton()
@@ -18,6 +23,11 @@ public static class BlobClientUtilRegistrar
         return services;
     }
 
+    /// <summary>
+    /// Adds blob client util as scoped.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The result of the operation.</returns>
     public static IServiceCollection AddBlobClientUtilAsScoped(this IServiceCollection services)
     {
         services.AddBlobContainerUtilAsSingleton()
