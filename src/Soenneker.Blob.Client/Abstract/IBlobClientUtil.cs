@@ -12,7 +12,12 @@ public interface IBlobClientUtil
 {
     /// <summary>
     /// Will create container if it doesn't exist (if we haven't accessed this container since app restart)
-    /// NOTE: <paramref name="containerName"/> will be converted to lowercase. 
+    /// NOTE: <paramref name="containerName"/> will be converted to lowercase.
     /// </summary>
+    /// <param name="containerName">Name of the container to target.</param>
+    /// <param name="relativeUrl">URL of the relative to target.</param>
+    /// <param name="publicAccessType">Blob-container public access level to require.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task whose result is the requested blob Client.</returns>
     ValueTask<BlobClient> Get(string containerName, string relativeUrl, PublicAccessType publicAccessType = PublicAccessType.None, CancellationToken cancellationToken = default);
 }
