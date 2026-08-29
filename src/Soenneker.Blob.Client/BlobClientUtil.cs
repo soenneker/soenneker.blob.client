@@ -8,7 +8,7 @@ using Soenneker.Extensions.ValueTask;
 
 namespace Soenneker.Blob.Client;
 
-///<inheritdoc cref="IBlobClientUtil"/>
+/// <inheritdoc cref="IBlobClientUtil"/>
 public sealed class BlobClientUtil : IBlobClientUtil
 {
     private readonly IBlobContainerUtil _blobContainerUtil;
