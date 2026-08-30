@@ -5,7 +5,7 @@
 
 # Soenneker.Blob.Client
 
-This should be used for any connection to Blob storage that is needed due to it's reuse of connections.
+Resolves Azure `BlobClient` instances through a cached container client and creates a missing container before returning the blob client.
 
 ## Install
 
@@ -13,31 +13,76 @@ This should be used for any connection to Blob storage that is needed due to it'
 dotnet add package Soenneker.Blob.Client
 ```
 
-## Quick start
+Configure the Azure Storage connection string:
+
+```json
+{
+  "Azure": {
+    "Storage": {
+      "Blob": {
+        "ConnectionString": "<connection string>"
+      }
+    }
+  }
+}
+```
+
+Keep the real value in an environment-specific secret provider rather than committing it to configuration files.
+
+Register the utility in `Program.cs`:
 
 ```csharp
 using Soenneker.Blob.Client.Registrars;
-using Microsoft.Extensions.DependencyInjection;
 
-var services = new ServiceCollection();
-var result = services.AddBlobClientUtilAsSingleton();
+builder.Services.AddBlobClientUtilAsSingleton();
 ```
 
-Registers Blob Client Util with a singleton lifetime.
+The singleton registration is the usual choice. A scoped registration is available, but it still uses the singleton container cache.
 
-## What you get
+## Resolve a blob client
 
-- `IBlobClientUtil` — This should be used for any connection to Blob storage that is needed due to it's reuse of connections.
-- `BlobClientUtilRegistrar` — A utility library for Azure Blob storage client operations.
+```csharp
+using Azure.Storage.Blobs;
+using Soenneker.Blob.Client.Abstract;
 
-## API at a glance
+public sealed class InvoiceStore(IBlobClientUtil blobClients)
+{
+    public async ValueTask<BlobClient> GetInvoice(
+        Guid invoiceId,
+        CancellationToken cancellationToken)
+    {
+        return await blobClients.Get(
+            "invoices",
+            $"2026/{invoiceId:N}.pdf",
+            cancellationToken: cancellationToken);
+    }
+}
+```
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `IBlobClientUtil.Get(containerName, relativeUrl, publicAccessType, cancellationToken)` | Will create container if it doesn't exist (if we haven't accessed this container since app restart) NOTE: `containerName` will be converted to lowercase. | A task whose result is the requested blob Client. |
-| `BlobClientUtilRegistrar.AddBlobClientUtilAsSingleton(services)` | Registers Blob Client Util with a singleton lifetime. | The same service collection, so additional registrations can be chained. |
-| `BlobClientUtilRegistrar.AddBlobClientUtilAsScoped(services)` | Registers Blob Client Util with a scoped lifetime. | The same service collection, so additional registrations can be chained. |
+`relativeUrl` is an Azure blob name, not a URL. Slashes create a virtual hierarchy in tools and listings, but the name remains one blob key.
 
-## Practical notes
+The returned `BlobClient` can be used with the Azure SDK directly:
+
+```csharp
+BlobClient blob = await blobClients.Get(
+    "invoices",
+    "2026/summary.pdf",
+    cancellationToken: cancellationToken);
+
+await blob.UploadAsync(stream, overwrite: true, cancellationToken);
+```
+
+## Container behavior
+
+- Container names are converted to lowercase before lookup.
+- The first lookup for a container checks Azure and creates it if missing.
+- `PublicAccessType.None` is the default and keeps a newly created container private.
+- `publicAccessType` is used only when creating a missing container. It does not inspect or change the access policy of an existing container.
+- Container clients are cached by normalized container name. Use one consistent public-access choice for each container.
+
+## Operational notes
 
 - Cancellation stops pending work; it does not undo work that has already completed.
+- Resolving a blob client can perform a container existence check or creation, so it is not a purely local factory call.
+- This utility does not upload, download, overwrite, delete, or authorize individual blobs; those behaviors come from the returned Azure SDK client and its credentials.
+- Treat public container access as an explicit data-exposure decision. Prefer private containers and SAS URLs for limited external access.
